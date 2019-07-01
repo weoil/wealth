@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "memory-cache": "^0.2.0",
     "moment": "^2.24.0",
     "nodemailer": "^6.2.1",
     "spider-node": "^1.0.203"

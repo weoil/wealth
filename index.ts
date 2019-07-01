@@ -1,10 +1,10 @@
 import SpiderNode from 'spider-node';
-import * as CP from 'child_process';
-import * as path from 'path';
 import * as Log from 'log4js';
 import { sendEmail } from './email';
-import * as dayjs from 'dayjs';
-import moment from 'moment'
+import * as moment from 'moment';
+import { Cache } from 'memory-cache';
+const hc = new Cache();
+const lc = new Cache();
 Log.configure({
   appenders: {
     file: {
@@ -39,8 +39,8 @@ interface IHigh {
   id: string;
   link: string;
 }
-let cache = new Set<IHigh>();
-let lowcache = new Set<IHigh>();
+// let cache = new Set<IHigh>();
+// let lowcache = new Set<IHigh>();
 const spider = new SpiderNode({
   name: '转债',
   log: false,
@@ -72,15 +72,22 @@ const spider = new SpiderNode({
             });
           }
         });
-
-        cache.forEach(item => {
-          if (!highs.has(item)) {
-            cache.delete(item);
-          }else {
-            highs.delete(item)
+        highs.forEach(item => {
+          if (hc.get(item.id)) {
+            highs.delete(item);
+          } else {
+            hc.put(item.id, item, 300000);
+          }
+        });
+        lows.forEach(item => {
+          if (lc.get(item.id)) {
+            lows.delete(item);
+          } else {
+            lc.put(item.id, item, 300000);
           }
         });
         if (highs.size) {
+          console.log(moment().utcOffset(8));
           const tArray = Array.from(highs);
           log.error(
             tArray
@@ -91,31 +98,23 @@ const spider = new SpiderNode({
           );
           sendEmail(tArray);
         }
-
-        lowcache.forEach(item => {
-          if (!lows.has(item)) {
-            lowcache.delete(item);
-          }else {
-            lows.delete(item)
-          }
-        });
         if (lows.size) {
           const tArray = Array.from(lows);
-          log.error(
+          log.info(
             tArray
               .map(h => {
                 return h.id;
               })
               .toString()
           );
-          sendEmail(tArray,'价值提醒');
+          sendEmail(tArray, '价值提醒');
         }
       }
     }
   ]
 });
 function checkTimeSlot() {
-  const currentDate = moment().utcOffset(8)
+  const currentDate = moment().utcOffset(8);
   const h = currentDate.hour();
   const m = currentDate.minute();
   let week = currentDate.day();
@@ -138,36 +137,42 @@ function checkTimeSlot() {
     }
   }
 }
-spider.plan('*/10 * * * * *', () => {
-  try {
-    checkTimeSlot();
-  } catch (e) {
-    cache.clear();
-    lowcache.clear();
-    spider.status = 1;
-    return;
-  }
-  spider.push(
-    `https://www.jisilu.cn/data/cbnew/cb_list/?___jsl=LST___t=${Date.now()}`,
-    {
-      method: 'POST',
-      formData: {
-        fprice: '',
-        tprice: '',
-        volume: '',
-        svolume: '',
-        premium_rt: '',
-        ytm_rt: '',
-        rating_cd: '',
-        is_search: 'N',
-        btype: '',
-        listed: 'Y',
-        industry: '',
-        bond_ids: '',
-        rp: 50,
-        page: 1
-      }
+spider.plan(
+  '*/10 * * * * *',
+  () => {
+    try {
+      checkTimeSlot();
+    } catch (e) {
+      hc.clear();
+      lc.clear();
+      spider.status = 1;
+      return;
     }
-  );
-  return [];
-},false);
+    spider.push(
+      `https://www.jisilu.cn/data/cbnew/cb_list/?___jsl=LST___t=${moment()
+        .utcOffset(8)
+        .valueOf()}`,
+      {
+        method: 'POST',
+        formData: {
+          fprice: '',
+          tprice: '',
+          volume: '',
+          svolume: '',
+          premium_rt: '',
+          ytm_rt: '',
+          rating_cd: '',
+          is_search: 'N',
+          btype: '',
+          listed: 'Y',
+          industry: '',
+          bond_ids: '',
+          rp: 50,
+          page: 1
+        }
+      }
+    );
+    return [];
+  },
+  false
+);
