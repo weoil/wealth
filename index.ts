@@ -125,16 +125,14 @@ function checkTimeSlot() {
   if (week > 5) {
     throw err;
   }
-  if (h <= 9 && m < 20) {
+  if (h < 9 || (h === 9 && m < 20)) {
     throw err;
   }
-  if (h >= 15 && m >= 0) {
+  if (h >= 15) {
     throw err;
   }
-  if (h < 13) {
-    if (h >= 12 && m >= 0) {
-      throw err;
-    }
+  if (h < 13 && h >= 12) {
+    throw err;
   }
 }
 spider.plan(

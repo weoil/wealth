@@ -1,18 +1,25 @@
 const moment = require('moment');
-const mc = require('memory-cache')
-mc.put(1,2,100)
-console.log(mc.get(1))
-setTimeout(() => {
-  console.log(mc.get(1))
-}, 120);
-console.log(
-  moment()
-    .utcOffset(0)
-    .hour(),
-  moment().hour(),
-  moment()
-    .utcOffset(8)
-    .valueOf()
-);
-
-//Asia/Shanghai
+function checkTimeSlot() {
+  const currentDate = moment().utcOffset(8);
+  const h = currentDate.hour();
+  const m = currentDate.minute();
+  let week = currentDate.day();
+  const err = new Error();
+  console.log(h);
+  if (week === 0) {
+    week = 7;
+  }
+  if (week > 5) {
+    throw err;
+  }
+  if (h < 9 || (h === 9 && m < 20)) {
+    throw err;
+  }
+  if (h >= 15) {
+    throw err;
+  }
+  if (h < 13 && h >= 12) {
+    throw err;
+  }
+}
+checkTimeSlot();
