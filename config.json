@@ -3,5 +3,6 @@
     "user": "lspidermail@163.com",
     "pass": "Luanzehui1996"
   },
-  "users": ["lspidermail@163.com","18571512321@163.com"]
+  "users": ["lspidermail@163.com"],
+  "blacklist":["113526","113503","123002","113508"]
 }

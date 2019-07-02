@@ -23,3 +23,8 @@ function checkTimeSlot() {
   }
 }
 checkTimeSlot();
+
+console.log([1, 3, 4, 5, 6].sort((a, b) => {
+  return b-a;
+})
+)

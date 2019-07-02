@@ -5,11 +5,11 @@ function genHtml(list) {
   for (let item of list) {
     tds += `
     <tr>
-    <td>${item.id}</td>
+      <td style="color:red;">${item.id}</td>
       <td>${item.name}</td>
       <td>${item.sincrease_rt}</td>
       <td>${item.increase_rt}</td>
-      <td><a href="${item.link}">链接</a></td>
+      <td>${item.trend === 1 ? '↑' : item.trend === 0 ? '-' : '↓'}</td>
     </tr>
   `;
   }
@@ -20,14 +20,14 @@ function genHtml(list) {
         <th>名称</th>
         <th>正股涨跌</th>
         <th>债涨值</th>
-        <th>地址</th>
+        <th>股趋势</th>
       </tr>
       ${tds}
     </table>
   `;
   return BaseHtml;
 }
-export async function sendEmail(list,title="重点提醒") {
+export async function sendEmail(list, title = '重点提醒') {
   let config = JSON.parse(
     fs.readFileSync('./config.json', { encoding: 'utf-8' })
   );
