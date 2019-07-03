@@ -63,14 +63,14 @@ const spider = new SpiderNode({
           if (hc.get(item.id) || blackList.includes(item.id)) {
             highs.delete(item);
           } else {
-            hc.put(item.id, item, 300000);
+            hc.put(item.id, item, 10800000);
           }
         });
         lows.forEach(item => {
           if (lc.get(item.id)) {
             lows.delete(item);
           } else {
-            lc.put(item.id, item, 300000);
+            lc.put(item.id, item, 10800000);
           }
         });
         function sort(a: IHigh, b: IHigh) {
@@ -160,7 +160,7 @@ function comparingTrends(item: IData) {
 }
 function createDayReport() {}
 spider.plan(
-  '*/10 * * * * *',
+  '*/5 * * * * *',
   () => {
     try {
       checkTimeSlot();
